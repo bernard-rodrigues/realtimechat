@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useChat } from "../contexts/ChatContext"
 
 export const Rooms = () => {
-    const {user, roomList} = useChat();
+    const {user, roomList, handleEnterRoom} = useChat();
   
     return(
         <div>
@@ -11,7 +11,13 @@ export const Rooms = () => {
             <h1>Rooms Available ({roomList.length})</h1>
             {roomList ?
                 roomList.map(room => (
-                    <Link to={room.roomName.replace(' ', '')} key={room.roomName}>{room.roomName}</Link>
+                    <Link 
+                        to={room.roomName.replace(' ', '')} 
+                        key={room.roomName}
+                        onClick={user ? () => handleEnterRoom(user, room) : () => alert("No user assigned")}
+                    >
+                            {room.roomName}
+                    </Link>
                 ))
                 :
                 <></>
