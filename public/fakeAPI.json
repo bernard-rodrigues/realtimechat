@@ -1,0 +1,79 @@
+{
+    "users": [
+      {
+        "username": "Alice",
+        "color": "#FF5733"
+      },
+      {
+        "username": "Bob",
+        "color": "#3366FF"
+      },
+      {
+        "username": "Charlie",
+        "color": "#33FF33"
+      }
+    ],
+    "rooms": [
+      {
+        "roomName": "General",
+        "users": [
+          {
+            "username": "Alice",
+            "color": "#FF5733"
+          },
+          {
+            "username": "Bob",
+            "color": "#3366FF"
+          },
+          {
+            "username": "Charlie",
+            "color": "#33FF33"
+          }
+        ],
+        "createdBy": {
+          "username": "Alice",
+          "color": "#FF5733"
+        }
+      }
+    ],
+    "messages": [
+      {
+        "createdBy": {
+          "username": "Alice",
+          "color": "#FF5733"
+        },
+        "timeCreated": "2024-03-26T12:00:00Z",
+        "message": "Hello everyone!",
+        "messageTo": null,
+        "room": {
+          "roomName": "General",
+          "users": [
+            {
+              "username": "Alice",
+              "color": "#FF5733"
+            },
+            {
+              "username": "Bob",
+              "color": "#3366FF"
+            },
+            {
+              "username": "Charlie",
+              "color": "#33FF33"
+            }
+          ],
+          "createdBy": {
+            "username": "Alice",
+            "color": "#FF5733"
+          }
+        }
+      }
+    ],
+    "colors": {
+      "colorsHEX": [
+        "#FF5733",
+        "#3366FF",
+        "#33FF33"
+      ]
+    }
+  }
+  

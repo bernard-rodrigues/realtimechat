@@ -1,10 +1,9 @@
-import { FormEvent, ReactNode, createContext, useContext, useState } from "react";
+import { FormEvent, ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface User{
+export interface User{
     username: string;
     color: string;
-    favorites: User[];
 }
 
 export interface Room{
@@ -13,11 +12,27 @@ export interface Room{
     createdBy: User
 }
 
+interface Message{
+    createdBy: User,
+    timeCreated: Date,
+    message: string,
+    messageTo: User | null,
+    room: Room
+}
+
 interface ChatContextProps{
+    userList: User[],
+    addUser: (e: FormEvent<HTMLFormElement>, user: User) => void,
+    removeUser: (e: FormEvent<HTMLFormElement>, user: User) => void,
+    
     user: User | null,
     handleCreateUser: (e: FormEvent<HTMLFormElement>, current_user: User) => void,
+    
     roomList: Room[],
-    handleCreateRoom: (e: FormEvent<HTMLFormElement>, roomName: string, user: User) => void
+    handleCreateRoom: (e: FormEvent<HTMLFormElement>, roomName: string, user: User) => void,
+
+    messages: Message[],
+    addMessage: (e: FormEvent<HTMLFormElement>, message: Message) => void
 }
 
 interface ChatContextProviderProps{
@@ -28,6 +43,18 @@ export const ChatContext = createContext({} as ChatContextProps);
 
 export const UserContextProvider = (props: ChatContextProviderProps) => {
     const [user, setUser] = useState<User | null>(null);
+    const [userList, setUserList] = useState<User[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
+
+    useEffect(() => {
+        fetch('/fakeAPI.json')
+            .then(response => response.json())
+            .then(data => {
+                setUserList(data.users as User[]);
+                setMessages(data.messages as Message[]);
+                setRoomList(data.rooms as Room[])
+            })
+    }, [])
 
     const navigate = useNavigate();
 
@@ -44,18 +71,42 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
             setRoomList([...roomList, {roomName: roomName, users: [user], createdBy: user}]);
             navigate('/' + roomName.replace(' ', '') + '/');
         }else{
-            alert('Room name not available')
+            alert('Room name not available');
         }
+    }
+
+    const addUser = (e: FormEvent<HTMLFormElement>, user: User) => {
+        e.preventDefault();
+        if(userList.filter(currentUser => currentUser === user).length === 0){
+            setUserList([...userList, user])
+        }else{
+            alert('User already exists');
+        }
+    }
+
+    const removeUser = (e: FormEvent<HTMLFormElement>, user: User) => {
+        e.preventDefault();
+        setUserList(userList.filter(currentUser => currentUser !== user));
+    }
+
+    const addMessage = (e: FormEvent<HTMLFormElement>, message: Message) => {
+        e.preventDefault();
+        setMessages([...messages, message]);
     }
     
     return(
         <ChatContext.Provider 
             value={
                 {
+                    userList,
                     user,
                     handleCreateUser,
                     roomList,
                     handleCreateRoom,
+                    addUser,
+                    removeUser,
+                    messages,
+                    addMessage
                 }
             }
         >
