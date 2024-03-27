@@ -15,12 +15,12 @@ const options: Intl.DateTimeFormatOptions =
     }
 
 export const ChatRoom = (props: RoomProps) => {   
-    const {user, messages, addMessage} = useChat();
+    const {user, messages, handleAddMessage, handleLeaveRoom} = useChat();
     const [messageText, setMessageText] = useState('');
     const [messageTo, setMessageTo] = useState<User | null>(null);
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-        addMessage(event, {
+        handleAddMessage(event, {
             createdBy: user!,
             message: messageText,
             messageTo: messageTo,
@@ -59,6 +59,7 @@ export const ChatRoom = (props: RoomProps) => {
                 <input type="text" value={messageText} placeholder="Type your message..." onChange={e => setMessageText(e.target.value)} />
                 <button type="submit" disabled={messageText === '' ? true : false}>Send to <span>{messageTo ? messageTo.username : "everyone"}</span></button>
             </form>
+            <button onClick={() => user ? handleLeaveRoom(user, props.room) : alert("No user assigned")}>Leave room</button>
         </>
     )
 }

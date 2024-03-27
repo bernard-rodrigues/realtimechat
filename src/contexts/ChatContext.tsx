@@ -22,17 +22,18 @@ interface Message{
 
 interface ChatContextProps{
     userList: User[],
-    addUser: (e: FormEvent<HTMLFormElement>, user: User) => void,
-    removeUser: (e: FormEvent<HTMLFormElement>, user: User) => void,
+    handleAddUser: (e: FormEvent<HTMLFormElement>, user: User) => void,
     
     user: User | null,
     handleCreateUser: (e: FormEvent<HTMLFormElement>, current_user: User) => void,
     
     roomList: Room[],
     handleCreateRoom: (e: FormEvent<HTMLFormElement>, roomName: string, user: User) => void,
+    handleEnterRoom: (user: User, room: Room) => void,
+    handleLeaveRoom: (user: User, room: Room) => void,
 
     messages: Message[],
-    addMessage: (e: FormEvent<HTMLFormElement>, message: Message) => void
+    handleAddMessage: (e: FormEvent<HTMLFormElement>, message: Message) => void
 }
 
 interface ChatContextProviderProps{
@@ -75,7 +76,31 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
         }
     }
 
-    const addUser = (e: FormEvent<HTMLFormElement>, user: User) => {
+    const handleEnterRoom = (user: User, room: Room) => {
+        // Filter every room but the one user is entering
+        const notTheRoomItIsEntering = roomList.filter(currentRoom => currentRoom !== room);
+        // Update the room user is entering
+        room.users = [...room.users, user]
+        // Update the room list with the updated room
+        setRoomList([...notTheRoomItIsEntering, room])
+    }
+    
+    const handleLeaveRoom = (user: User, room: Room) => {
+        // Filter every room but the one user is leaving
+        const notTheRoomItIsEntering = roomList.filter(currentRoom => currentRoom !== room);
+        // Remover user from leaved room
+        room.users = room.users.filter(currentUser => currentUser !== user);
+        if(room.users.length > 0){
+            // Update the room list with the updated room
+            setRoomList([...notTheRoomItIsEntering, room]);
+        }else{
+            // Remove the room from roomlist
+            setRoomList(notTheRoomItIsEntering);
+        }
+        navigate("/")
+    }
+
+    const handleAddUser = (e: FormEvent<HTMLFormElement>, user: User) => {
         e.preventDefault();
         if(userList.filter(currentUser => currentUser === user).length === 0){
             setUserList([...userList, user])
@@ -84,12 +109,7 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
         }
     }
 
-    const removeUser = (e: FormEvent<HTMLFormElement>, user: User) => {
-        e.preventDefault();
-        setUserList(userList.filter(currentUser => currentUser !== user));
-    }
-
-    const addMessage = (e: FormEvent<HTMLFormElement>, message: Message) => {
+    const handleAddMessage = (e: FormEvent<HTMLFormElement>, message: Message) => {
         e.preventDefault();
         setMessages([...messages, message]);
     }
@@ -99,14 +119,18 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
             value={
                 {
                     userList,
+                    handleAddUser,
+                    
                     user,
                     handleCreateUser,
+                    
                     roomList,
                     handleCreateRoom,
-                    addUser,
-                    removeUser,
+                    handleEnterRoom,
+                    handleLeaveRoom,
+                    
                     messages,
-                    addMessage
+                    handleAddMessage
                 }
             }
         >
