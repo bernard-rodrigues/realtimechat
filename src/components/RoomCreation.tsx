@@ -10,7 +10,7 @@ export const RoomCreation = () => {
         <>
             <h1>Room Creation</h1>
             <h2>Creating a room for <span style={{color: user?.color}}>{user?.username}</span>:</h2>
-            <form onSubmit={(e) => handleCreateRoom(e, roomName, user!)}>
+            <form onSubmit={(e) => user ? handleCreateRoom(e, roomName, user!) : () => ''}>
                 <label>Room name: </label>
                 <input value={roomName} onChange={e => setRoomName(e.target.value)} />
                 <button type="submit">Create</button>

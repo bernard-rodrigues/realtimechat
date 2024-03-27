@@ -35,20 +35,15 @@ export const ChatRoom = (props: RoomProps) => {
             <div>
                 <h1>{props.room.roomName}</h1>
                 <h2>Created by <span>{props.room.createdBy.username}</span></h2>
-                <h3>Users online:</h3>
+                <h3>Users online: ({props.room.users.length - 1})</h3>
                 <div>
                     <button style={null === messageTo ? {fontWeight: 'bold'} : {}} onClick={() => setMessageTo(null)}>Everyone</button>
                 </div>
-                {props.room.users.map(currentUser => (
-                    <div key={currentUser.username}>
-                        {currentUser !== user ?
-                            <button style={currentUser === messageTo ? {color: currentUser.color, fontWeight: 'bold'} : {color: currentUser.color}} onClick={() => setMessageTo(currentUser)}>{currentUser.username}</button>
-                            :
-                            <></>
-                        }
-
-                    </div>
-                ))}
+                {props.room.users.map(currentUser => {
+                    if(user && currentUser.username !== user.username){
+                        return <button key={currentUser.username} style={currentUser === messageTo ? {color: currentUser.color, fontWeight: 'bold'} : {color: currentUser.color}} onClick={() => setMessageTo(currentUser)}>{currentUser.username}</button>
+                    }
+                })}
             </div>
             <form onSubmit={(e) => handleSubmit(e)}>
                 <div>

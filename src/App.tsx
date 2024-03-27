@@ -13,9 +13,9 @@ export const App = () => {
     <Routes>
       <Route path="/" element={user ? <Rooms /> : <UserCreation />} />
       <Route path="/room-create/" element={user ? <RoomCreation /> : <UserCreation />} />
-      {roomList.map(room => (
+      {roomList ? roomList.map(room => (
         <Route key={room.roomName} path={`/room/${room.roomName.replace(' ', '')}/`} element={<ChatRoom room={room}/>} />
-      ))}
+      )) : <></>}
       <Route path="/room/*" element={<RoomNotFound />} />
     </Routes>
   )

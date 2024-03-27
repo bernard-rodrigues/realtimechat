@@ -1,5 +1,7 @@
 import { FormEvent, ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { database } from "../utils/firebase";
+import { onValue, ref, set } from "firebase/database";
 
 export interface User{
     username: string;
@@ -21,8 +23,9 @@ interface Message{
 }
 
 interface ChatContextProps{
+    colors: string[],
+
     userList: User[],
-    handleAddUser: (e: FormEvent<HTMLFormElement>, user: User) => void,
     
     user: User | null,
     handleCreateUser: (e: FormEvent<HTMLFormElement>, current_user: User) => void,
@@ -44,36 +47,73 @@ interface ChatContextProviderProps{
 export const ChatContext = createContext({} as ChatContextProps);
 
 export const UserContextProvider = (props: ChatContextProviderProps) => {
+    const navigate = useNavigate();
+    
     const [user, setUser] = useState<User | null>(null);
     const [userList, setUserList] = useState<User[]>([]);
+    const [roomList, setRoomList] = useState<Room[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
+    const [colors, setColors] = useState<string[]>([]);
 
     useEffect(() => {
-        fetch('/fakeAPI.json')
-            .then(response => response.json())
-            .then(data => {
-                setUserList(data.users as User[]);
-                setMessages(data.messages.map((message: Message) => ({
-                    ...message,
-                    timeCreated: new Date(message.timeCreated),
-                })) as Message[]);
-                setRoomList(data.rooms as Room[]);
+        // fetch('/fakeAPI.json')
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         setUserList(data.users as User[]);
+        //         setMessages(data.messages.map((message: Message) => ({
+        //             ...message,
+        //             timeCreated: new Date(message.timeCreated),
+        //         })) as Message[]);
+        //         setRoomList(data.rooms as Room[]);
+        //         set(ref(database, '/'), data)
+        //     })
+
+        const loggedUser = sessionStorage.getItem("user");
+
+        if(loggedUser){
+            setUser(JSON.parse(loggedUser) as User);
+        }
+
+        const dataRef = ref(database);
+        if(dataRef){
+            onValue(dataRef, (snapshot) => {
+                if(snapshot.exists()){
+                    const data = snapshot.val();
+                    setUserList(data.users ? data.users as User[] : []);
+                    setRoomList(data.rooms ? data.rooms as Room[] : []);
+                    setMessages(data.messages ? data.messages.map((message: Message) => ({
+                                    ...message,
+                                    timeCreated: new Date(message.timeCreated),
+                                })) as Message[] : []);
+                    setColors(data.colors ? data.colors.colorsHEX as string[] : ['#000000']);
+                }else{
+                    alert("No data available");
+                }
             })
+        }
     }, [])
 
-    const navigate = useNavigate();
-
-    const handleCreateUser = (e: FormEvent<HTMLFormElement>, current_user: User) => {
+    // const addMessageToDatabase = (message: Message) => {
+    //     set(ref(database, 'messages/'), message);
+    // }
+    
+    const handleCreateUser = (e: FormEvent<HTMLFormElement>, user: User) => {
         e.preventDefault();
-        setUser(current_user);
+        if(userList ? userList.findIndex(currentUser => currentUser.username === user.username) === -1 : true){
+            setUser(user);
+            set(ref(database, 'users/'), [...userList, user]);
+            const jsonCurrentUser = JSON.stringify(user);
+            sessionStorage.setItem("user", jsonCurrentUser);
+        }else{
+            alert("Username already exists!");
+        }
     }
-
-    const [roomList, setRoomList] = useState<Room[]>([]);
 
     const handleCreateRoom = (e: FormEvent<HTMLFormElement>, roomName: string, user: User) => {
         e.preventDefault();
-        if(roomList.filter(room => room.roomName === roomName).length === 0){
-            setRoomList([...roomList, {roomName: roomName, users: [user], createdBy: user}]);
+        if(roomList.findIndex(room => room.roomName === roomName) === -1){
+            // write on database
+            set(ref(database, 'rooms/'), [...roomList, {roomName: roomName, users: [user], createdBy: user}]);
             navigate('/room/' + roomName.replace(' ', '') + '/');
         }else{
             alert('Room name not available');
@@ -84,51 +124,43 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
         // Filter every room but the one user is entering
         const notTheRoomItIsEntering = roomList.filter(currentRoom => currentRoom !== room);
         // Update the room user is entering
-        room.users = [...room.users, user]
+        room.users = [...room.users, user];
         // Update the room list with the updated room
-        setRoomList([...notTheRoomItIsEntering, room])
+        set(ref(database, 'rooms/'), [...notTheRoomItIsEntering, room]);
     }
     
     const handleLeaveRoom = (user: User, room: Room) => {
         // Filter every room but the one user is leaving
         const notTheRoomItIsEntering = roomList.filter(currentRoom => currentRoom !== room);
         // Remover user from leaved room
-        room.users = room.users.filter(currentUser => currentUser !== user);
+        room.users = room.users.filter(currentUser => currentUser.username !== user.username);
         if(room.users.length > 0){
             // Update the room list with the updated room
-            setRoomList([...notTheRoomItIsEntering, room]);
+            set(ref(database, 'rooms/'), [...notTheRoomItIsEntering, room]);
         }else{
             // Remove the room from roomlist
-            setRoomList(notTheRoomItIsEntering);
+            set(ref(database, 'rooms/'), notTheRoomItIsEntering);
         }
         navigate("/");
     }
 
     const handleCloseRoom = (room: Room) => {
-        setRoomList(roomList.filter(currentRoom => currentRoom !== room));
+        set(ref(database, 'rooms/'), roomList.filter(currentRoom => currentRoom !== room));
         navigate("/");
-    }
-
-    const handleAddUser = (e: FormEvent<HTMLFormElement>, user: User) => {
-        e.preventDefault();
-        if(userList.filter(currentUser => currentUser === user).length === 0){
-            setUserList([...userList, user])
-        }else{
-            alert('User already exists');
-        }
     }
 
     const handleAddMessage = (e: FormEvent<HTMLFormElement>, message: Message) => {
         e.preventDefault();
-        setMessages([...messages, message]);
+        set(ref(database, 'messages/'), [...messages, {...message, timeCreated: message.timeCreated.toLocaleString('en-US')}]);
     }
     
     return(
         <ChatContext.Provider 
             value={
                 {
+                    colors,
+                    
                     userList,
-                    handleAddUser,
                     
                     user,
                     handleCreateUser,

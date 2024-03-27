@@ -3,17 +3,10 @@ import { useChat } from "../contexts/ChatContext";
 
 export const UserCreation = () => {
 
-    const {handleCreateUser} = useChat()
+    const {handleCreateUser, colors} = useChat()
     
     const [username, setUsername] = useState('');
-    const [colors, setColors] = useState<string[]>([]);
     const [color, setColor] = useState('');
-
-    useEffect(() => {
-        fetch('/fakeAPI.json')
-            .then(response => response.json())
-            .then(data => setColors(data.colors.colorsHEX));
-    }, [])
 
     useEffect(() => {
         if(colors){
