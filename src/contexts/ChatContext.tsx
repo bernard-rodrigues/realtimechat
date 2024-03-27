@@ -31,6 +31,7 @@ interface ChatContextProps{
     handleCreateRoom: (e: FormEvent<HTMLFormElement>, roomName: string, user: User) => void,
     handleEnterRoom: (user: User, room: Room) => void,
     handleLeaveRoom: (user: User, room: Room) => void,
+    handleCloseRoom: (room: Room) => void,
 
     messages: Message[],
     handleAddMessage: (e: FormEvent<HTMLFormElement>, message: Message) => void
@@ -70,7 +71,7 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
         e.preventDefault();
         if(roomList.filter(room => room.roomName === roomName).length === 0){
             setRoomList([...roomList, {roomName: roomName, users: [user], createdBy: user}]);
-            navigate('/' + roomName.replace(' ', '') + '/');
+            navigate('/room/' + roomName.replace(' ', '') + '/');
         }else{
             alert('Room name not available');
         }
@@ -97,7 +98,12 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
             // Remove the room from roomlist
             setRoomList(notTheRoomItIsEntering);
         }
-        navigate("/")
+        navigate("/");
+    }
+
+    const handleCloseRoom = (room: Room) => {
+        setRoomList(roomList.filter(currentRoom => currentRoom !== room));
+        navigate("/");
     }
 
     const handleAddUser = (e: FormEvent<HTMLFormElement>, user: User) => {
@@ -128,6 +134,7 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
                     handleCreateRoom,
                     handleEnterRoom,
                     handleLeaveRoom,
+                    handleCloseRoom,
                     
                     messages,
                     handleAddMessage

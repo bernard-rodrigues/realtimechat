@@ -12,7 +12,7 @@ export const Rooms = () => {
             {roomList ?
                 roomList.map(room => (
                     <Link 
-                        to={room.roomName.replace(' ', '')} 
+                        to={`/room/${room.roomName.replace(' ', '')}`} 
                         key={room.roomName}
                         onClick={user ? () => handleEnterRoom(user, room) : () => alert("No user assigned")}
                     >
