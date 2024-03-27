@@ -53,8 +53,11 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
             .then(response => response.json())
             .then(data => {
                 setUserList(data.users as User[]);
-                setMessages(data.messages as Message[]);
-                setRoomList(data.rooms as Room[])
+                setMessages(data.messages.map((message: Message) => ({
+                    ...message,
+                    timeCreated: new Date(message.timeCreated),
+                })) as Message[]);
+                setRoomList(data.rooms as Room[]);
             })
     }, [])
 
