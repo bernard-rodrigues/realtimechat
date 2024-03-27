@@ -90,7 +90,7 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
         const notTheRoomItIsEntering = roomList.filter(currentRoom => currentRoom !== room);
         // Remover user from leaved room
         room.users = room.users.filter(currentUser => currentUser !== user);
-        if(room.users){
+        if(room.users.length > 0){
             // Update the room list with the updated room
             setRoomList([...notTheRoomItIsEntering, room]);
         }else{
