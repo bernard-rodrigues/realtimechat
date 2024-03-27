@@ -11,6 +11,14 @@
       {
         "username": "Charlie",
         "color": "#33FF33"
+      },
+      {
+        "username": "David",
+        "color": "#FF33FF"
+      },
+      {
+        "username": "Eva",
+        "color": "#FFA500"
       }
     ],
     "rooms": [
@@ -28,11 +36,61 @@
           {
             "username": "Charlie",
             "color": "#33FF33"
+          },
+          {
+            "username": "David",
+            "color": "#FF33FF"
+          },
+          {
+            "username": "Eva",
+            "color": "#FFA500"
           }
         ],
         "createdBy": {
           "username": "Alice",
           "color": "#FF5733"
+        }
+      },
+      {
+        "roomName": "Private Room",
+        "users": [
+          {
+            "username": "Alice",
+            "color": "#FF5733"
+          },
+          {
+            "username": "David",
+            "color": "#FF33FF"
+          },
+          {
+            "username": "Eva",
+            "color": "#FFA500"
+          }
+        ],
+        "createdBy": {
+          "username": "David",
+          "color": "#FF33FF"
+        }
+      },
+      {
+        "roomName": "Team Chat",
+        "users": [
+          {
+            "username": "Bob",
+            "color": "#3366FF"
+          },
+          {
+            "username": "Charlie",
+            "color": "#33FF33"
+          },
+          {
+            "username": "David",
+            "color": "#FF33FF"
+          }
+        ],
+        "createdBy": {
+          "username": "Charlie",
+          "color": "#33FF33"
         }
       }
     ],
@@ -59,11 +117,49 @@
             {
               "username": "Charlie",
               "color": "#33FF33"
+            },
+            {
+              "username": "David",
+              "color": "#FF33FF"
+            },
+            {
+              "username": "Eva",
+              "color": "#FFA500"
             }
           ],
           "createdBy": {
             "username": "Alice",
             "color": "#FF5733"
+          }
+        }
+      },
+      {
+        "createdBy": {
+          "username": "Bob",
+          "color": "#3366FF"
+        },
+        "timeCreated": "2024-03-26T12:15:00Z",
+        "message": "Hey there!",
+        "messageTo": null,
+        "room": {
+          "roomName": "Team Chat",
+          "users": [
+            {
+              "username": "Bob",
+              "color": "#3366FF"
+            },
+            {
+              "username": "Charlie",
+              "color": "#33FF33"
+            },
+            {
+              "username": "David",
+              "color": "#FF33FF"
+            }
+          ],
+          "createdBy": {
+            "username": "Charlie",
+            "color": "#33FF33"
           }
         }
       }
@@ -72,7 +168,13 @@
       "colorsHEX": [
         "#FF5733",
         "#3366FF",
-        "#33FF33"
+        "#33FF33",
+        "#FF33FF",
+        "#FFA500",
+        "#800080",
+        "#FFFF00",
+        "#00FF00",
+        "#0000FF"
       ]
     }
   }
