@@ -35,24 +35,22 @@ export const ChatRoom = (props: RoomProps) => {
             <div>
                 <h1>{props.room.roomName}</h1>
                 <h2>Created by <span>{props.room.createdBy.username}</span></h2>
-                <h3>Users online:</h3>
+                <h3>Users online: ({props.room.users.length - 1})</h3>
                 <div>
                     <button style={null === messageTo ? {fontWeight: 'bold'} : {}} onClick={() => setMessageTo(null)}>Everyone</button>
                 </div>
-                {props.room.users.map(currentUser => (
-                    <div key={currentUser.username}>
-                        {currentUser !== user ?
-                            <button style={currentUser === messageTo ? {color: currentUser.color, fontWeight: 'bold'} : {color: currentUser.color}} onClick={() => setMessageTo(currentUser)}>{currentUser.username}</button>
-                            :
-                            <></>
-                        }
-
-                    </div>
-                ))}
+                {props.room.users.map(currentUser => {
+                    if(user && currentUser.username !== user.username){
+                        return <button key={currentUser.username} style={currentUser === messageTo ? {color: currentUser.color, fontWeight: 'bold'} : {color: currentUser.color}} onClick={() => setMessageTo(currentUser)}>{currentUser.username}</button>
+                    }
+                })}
             </div>
             <form onSubmit={(e) => handleSubmit(e)}>
                 <div>
-                    {messages.filter(message => message.room.roomName === props.room.roomName).map((currentMessage, index) => (
+                    {messages
+                        .filter(message => message.room.roomName === props.room.roomName) // Filters messages by the current room
+                        .sort((a, b) => new Date(a.timeCreated).getTime() - new Date(b.timeCreated).getTime()) // Sorts messages by date (older to newer)
+                        .map((currentMessage, index) => (
                         <p key={index}><b><span style={{color: currentMessage.createdBy.color}}>{currentMessage.createdBy.username}</span> said to <span style={{color: currentMessage.messageTo?.color}}>{currentMessage.messageTo ? currentMessage.messageTo.username : "everyone"}</span>:</b> {currentMessage.message} <span>(at {currentMessage.timeCreated.toLocaleDateString('en-US', options)})</span></p>
                     ))}
                 </div>

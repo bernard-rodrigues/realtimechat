@@ -8,9 +8,9 @@ export const Rooms = () => {
         <div>
             <h1>Rooms</h1>
             <h2>Welcome, <span style={{color: user?.color}}>{user?.username}</span>!</h2>
-            <h1>Rooms Available ({roomList.length})</h1>
+            <h1>Rooms Available ({roomList ? roomList.length : 0})</h1>
             {roomList ?
-                roomList.map(room => (
+                roomList.slice().sort((a, b) => a.roomName.localeCompare(b.roomName)).map(room => (
                     <Link 
                         to={`/room/${room.roomName.replace(' ', '')}`} 
                         key={room.roomName}
