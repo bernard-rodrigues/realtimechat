@@ -18,6 +18,7 @@ interface Message{
     createdBy: User,
     timeCreated: Date,
     message: string,
+    isPrivate: boolean,
     messageTo: User | null,
     room: Room
 }
