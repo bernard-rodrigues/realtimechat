@@ -1,5 +1,8 @@
 import { FormEvent, useState } from "react";
 import { Room, User, useChat } from "../contexts/ChatContext"
+import { ExitIcon } from "../assets/ExitIcon";
+import { SendIcon } from "../assets/SendIcon";
+import { HiddenIcon } from "../assets/HiddenIcon";
 
 interface RoomProps{
     room: Room
@@ -37,49 +40,64 @@ export const ChatRoom = (props: RoomProps) => {
     }
     
     return(
-        <>
+        <div className="h-screen">
             <div>
-                <h1>{props.room.roomName}</h1>
-                <h2>Created by <span>{props.room.createdBy.username}</span></h2>
-                <h3>Online users: ({props.room.users.length - 1})</h3>
-                <div>
-                    <button style={null === messageTo ? {fontWeight: 'bold'} : {}} onClick={() => {setMessageTo(null); setIsPrivate(false)}}>Everyone</button>
+                <div className="bg-texture2 p-4 mb-1 relative">
+                    <h2 className="text-2xl text-texture1">{props.room.roomName}</h2>
+                    <h3 className="text-base text-texture1">Created by <span>{props.room.createdBy.username}</span></h3>
+                    <h3 className="text-base text-texture1 text-end">Online users: ({props.room.users.length - 1})</h3>
+                    <button 
+                        type="button" 
+                        onClick={() => user ? handleLeaveRoom(user, props.room) : alert("No user assigned")}
+                        className="absolute right-4 top-4"
+                    >
+                        <ExitIcon fill="#49708a" size={36}/>
+                    </button>
                 </div>
-                {props.room.users.map(currentUser => {
-                    if(user && currentUser.username !== user.username){
-                        return <button key={currentUser.username} style={currentUser === messageTo ? {color: currentUser.color, fontWeight: 'bold'} : {color: currentUser.color}} onClick={() => setMessageTo(currentUser)}>{currentUser.username}</button>
-                    }
-                })}
             </div>
-            <form onSubmit={(e) => handleSubmit(e)}>
-                <div>
+            <form onSubmit={(e) => handleSubmit(e)} className="mx-1">
+                <div className="h-[calc(100vh-13rem)] bg-white p-1">
                     {messages
                         .filter(message => message.room.roomName === props.room.roomName) // Filters messages by the current room
                         .sort((a, b) => new Date(a.timeCreated).getTime() - new Date(b.timeCreated).getTime()) // Sorts messages by date (older to newer)
                         .map((currentMessage, index) => (
                             (user && currentMessage.createdBy.username === user.username) || !currentMessage.isPrivate || (currentMessage.isPrivate && user && currentMessage.messageTo?.username === user.username) ?
-                            <p key={index}><b><span style={{color: currentMessage.createdBy.color}}>{currentMessage.createdBy.username}</span> said {currentMessage.isPrivate ? <u>privately</u> : <></>} to <span style={{color: currentMessage.messageTo?.color}}>{currentMessage.messageTo ? currentMessage.messageTo.username : "everyone"}</span>:</b> {currentMessage.message} <span>(at {currentMessage.timeCreated.toLocaleDateString('en-US', options)})</span></p>
+                            <p key={index}><b><span style={{color: currentMessage.createdBy.color}}>{currentMessage.createdBy.username}</span> said {currentMessage.isPrivate ? <u>privately</u> : <></>} to <span style={{color: currentMessage.messageTo?.color}}>{currentMessage.messageTo ? currentMessage.messageTo.username : "everyone"}</span>:</b> {currentMessage.message} <span className="text-xs text-slate-400">(at {currentMessage.timeCreated.toLocaleDateString('en-US', options)})</span></p>
                             :
                             <div key={index}></div>
                     ))}
                 </div>
-                <input type="text" value={messageText} placeholder="Type your message..." onChange={e => setMessageText(e.target.value)} />
-                <button 
-                    type="button" 
-                    onClick={toggleIsPrivate} 
-                    style={isPrivate ? {backgroundColor: "lime"} : {}}
-                    disabled={!messageTo ? true : false}
-                >
-                    Privately
-                </button>
-                <button type="submit" disabled={messageText === '' ? true : false}>Send to <span>{messageTo ? messageTo.username : "everyone"}</span></button>
+                <div>
+                    <button type="button" style={null === messageTo ? {fontWeight: 'bold'} : {}} onClick={() => {setMessageTo(null); setIsPrivate(false)}}>Everyone</button>
+                </div>
+                {props.room.users.map(currentUser => {
+                    if(user && currentUser.username !== user.username){
+                        return <button type="button" key={currentUser.username} style={currentUser === messageTo ? {color: currentUser.color, fontWeight: 'bold'} : {color: currentUser.color}} onClick={() => setMessageTo(currentUser)}>{currentUser.username}</button>
+                    }
+                })}
+                
+                <div className="flex">
+                    <input type="text" value={messageText} placeholder="Type your message..." onChange={e => setMessageText(e.target.value)} />
+                    <button 
+                        type="button" 
+                        onClick={toggleIsPrivate} 
+                        style={isPrivate ? {backgroundColor: "lime"} : {}}
+                        disabled={!messageTo ? true : false}
+                    >
+                        {/* Privately */}
+                        <HiddenIcon />
+                    </button>
+                    <button type="submit" disabled={messageText === '' ? true : false}>
+                        {/* Send to <span>{messageTo ? messageTo.username : "everyone"}</span> */}
+                        <SendIcon />
+                    </button>
+                </div>
             </form>
-            <button type="button" onClick={() => user ? handleLeaveRoom(user, props.room) : alert("No user assigned")}>Leave room</button>
-            {props.room.createdBy === user ? 
+            {user && props.room.createdBy.username === user.username ? 
             <button type="button" onClick={() => user ? handleCloseRoom(props.room) : alert("No user assigned")}>Close room</button>
             :
             <div></div>
             }
-        </>
+        </div>
     )
 }

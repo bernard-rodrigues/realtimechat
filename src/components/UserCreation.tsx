@@ -1,34 +1,58 @@
 import { useEffect, useState } from "react"
 import { useChat } from "../contexts/ChatContext";
+import { Logo } from "./Logo";
+import { Button } from "./Button";
 
 export const UserCreation = () => {
 
     const {handleCreateUser, colors} = useChat()
     
     const [username, setUsername] = useState('');
-    const [color, setColor] = useState('');
+    const [currentColor, setCurrentColor] = useState('');
 
     useEffect(() => {
         if(colors){
-            setColor(colors[0]);
+            setCurrentColor(colors[0]);
         }
     },[colors]);
 
     return(
-        <>
-            <h1>User Creation</h1>
-            <form onSubmit={(e) => handleCreateUser(e, {username: username, color: color})}>
-                <label htmlFor="username">Username: </label>
-                <input type="text" id="username" value={username} onChange={(e) => setUsername(e.target.value)}/>
+        <form 
+            onSubmit={(e) => handleCreateUser(e, {username: username, color: currentColor})}
+            className="
+                h-screen flex flex-col items-center justify-center gap-4 px-8
+                md:px-32
+                [&>div]:flex [&>div]:flex-col [&>div]:items-center [&>div]:gap-2 [&>div]:w-full
+            "
+        >
+            <Logo />
+            <div>
+                <label htmlFor="username" className="text-texture3 text-xl">Type your username: </label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="border h-12 w-full p-2 text-center text-xl lg:w-[31rem]"
+                />
+            </div>
 
-                <label htmlFor="color">Color: </label>
-                <select id="color" value={color} style={{color: color}} onChange={(e) => setColor(e.target.value)}>
+            <div>
+                <span className="text-texture3 text-xl">Choose a color: </span>
+                <div className="grid md:flex grid-cols-4 gap-2">
                     {colors.map(color => (
-                        <option key={color} value={color} style={{color: color}}>{color}</option>
+                        <button 
+                            type="button"
+                            key={color} 
+                            style={currentColor === color ? {backgroundColor: color, border: "solid #333 4px"} : {backgroundColor: color}}
+                            className="h-12 w-12 rounded-full"
+                            onClick={() => setCurrentColor(color)}
+                        />
                     ))}
-                </select>
-                <button type="submit" disabled={username ? false : true}>Create</button>
-            </form>
-        </>
+                </div>
+            </div>
+            
+            <Button disabled={username ? false : true} title="Create"/>
+        </form>
     )
 }
