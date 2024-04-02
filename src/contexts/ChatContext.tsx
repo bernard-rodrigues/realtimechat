@@ -151,7 +151,12 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
 
     const handleAddMessage = (e: FormEvent<HTMLFormElement>, message: Message) => {
         e.preventDefault();
-        set(ref(database, 'messages/'), [...messages, {...message, timeCreated: message.timeCreated.toLocaleString('en-US')}]);
+        // Converts the Dates to strings for Realtime Database storage
+        const messagesWithStrings = messages.map(msg => ({
+            ...msg,
+            timeCreated: msg.timeCreated.toLocaleString('en-US')
+        }));
+        set(ref(database, 'messages/'), [...messagesWithStrings, {...message, timeCreated: message.timeCreated.toLocaleString('en-US')}]);
     }
     
     return(

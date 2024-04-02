@@ -47,7 +47,10 @@ export const ChatRoom = (props: RoomProps) => {
             </div>
             <form onSubmit={(e) => handleSubmit(e)}>
                 <div>
-                    {messages.filter(message => message.room.roomName === props.room.roomName).map((currentMessage, index) => (
+                    {messages
+                        .filter(message => message.room.roomName === props.room.roomName) // Filters messages by the current room
+                        .sort((a, b) => new Date(a.timeCreated).getTime() - new Date(b.timeCreated).getTime()) // Sorts messages by date (older to newer)
+                        .map((currentMessage, index) => (
                         <p key={index}><b><span style={{color: currentMessage.createdBy.color}}>{currentMessage.createdBy.username}</span> said to <span style={{color: currentMessage.messageTo?.color}}>{currentMessage.messageTo ? currentMessage.messageTo.username : "everyone"}</span>:</b> {currentMessage.message} <span>(at {currentMessage.timeCreated.toLocaleDateString('en-US', options)})</span></p>
                     ))}
                 </div>
