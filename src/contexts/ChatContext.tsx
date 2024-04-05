@@ -16,7 +16,7 @@ export interface Room{
 
 interface Message{
     createdBy: User,
-    timeCreated: Date,
+    timeCreated: string,
     message: string,
     isPrivate: boolean,
     messageTo: User | null,
@@ -105,11 +105,12 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
                     const data = snapshot.val();
                     setUserList(data.users ? data.users as User[] : []);
                     setRoomList(data.rooms ? data.rooms as Room[] : []);
-                    setMessages(data.messages ? data.messages.map((message: Message) => ({
-                                    ...message,
-                                    timeCreated: new Date(message.timeCreated),
+                    setMessages(data.messages ? data.messages.map((currentMessage: Message) => ({
+                                    ...currentMessage,
+                                    timeCreated: currentMessage.timeCreated,
                                 })) as Message[] : []);
                     setColors(data.colors ? data.colors.colorsHEX as string[] : ['#000000']);
+                    
                 }else{
                     alert("No data available");
                 }
@@ -117,9 +118,9 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
         }
     }, [])
 
-    // const addMessageToDatabase = (message: Message) => {
-    //     set(ref(database, 'messages/'), message);
-    // }
+    useEffect(() => {
+        console.log(messages);
+    }, [messages])
     
     const handleCreateUser = (e: FormEvent<HTMLFormElement>, user: User) => {
         e.preventDefault();
@@ -191,12 +192,10 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
 
     const handleAddMessage = (e: FormEvent<HTMLFormElement>, message: Message) => {
         e.preventDefault();
-        // Converts the Dates to strings for Realtime Database storage
-        const messagesWithStrings = messages.map(msg => ({
-            ...msg,
-            timeCreated: msg.timeCreated.toLocaleString('en-US')
-        }));
-        set(ref(database, 'messages/'), [...messagesWithStrings, {...message, timeCreated: message.timeCreated.toLocaleString('en-US')}]);
+        set(ref(database, 'messages/'), [
+            ...messages, 
+            {...message, timeCreated: message.timeCreated}
+        ]);
     }
     
     return(
