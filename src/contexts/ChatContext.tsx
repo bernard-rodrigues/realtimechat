@@ -30,6 +30,7 @@ interface ChatContextProps{
     
     user: User | null,
     handleCreateUser: (e: FormEvent<HTMLFormElement>, current_user: User) => void,
+    handleRemoveUser: () => void,
     
     roomList: Room[],
     handleCreateRoom: (e: FormEvent<HTMLFormElement>, roomName: string, user: User) => void,
@@ -137,7 +138,11 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
         roomsWithUser.forEach(currentRoom => user && handleLeaveRoom(user, currentRoom));
         localStorage.getItem("user") ? localStorage.removeItem("user") : "";
 
-        set(ref(database, 'users/'), userList.filter(currentUser => user && currentUser.username !== user.username));
+        set(ref(database, 'users/'), userList.filter(currentUser => user && currentUser.username !== user.username)).then(() => navigate("/"));
+
+        window.location.reload();
+
+        // EXCLUIR O USUÁRIO E REFRESCAR A PÁGINA DIREITO
     }
 
     const handleCreateRoom = (e: FormEvent<HTMLFormElement>, roomName: string, user: User) => {
@@ -204,6 +209,7 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
                     
                     user,
                     handleCreateUser,
+                    handleRemoveUser,
                     
                     roomList,
                     handleCreateRoom,
