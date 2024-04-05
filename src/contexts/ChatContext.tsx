@@ -1,3 +1,4 @@
+import CryptoJS from 'crypto-js';
 import { FormEvent, ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { database } from "../utils/firebase";
@@ -39,7 +40,8 @@ interface ChatContextProps{
     handleCloseRoom: (room: Room) => void,
 
     messages: Message[],
-    handleAddMessage: (e: FormEvent<HTMLFormElement>, message: Message) => void
+    handleAddMessage: (e: FormEvent<HTMLFormElement>, message: Message) => void,
+    decryptMessage: (message: string) => string
 }
 
 interface ChatContextProviderProps{
@@ -47,6 +49,8 @@ interface ChatContextProviderProps{
 }
 
 export const ChatContext = createContext({} as ChatContextProps);
+
+const secretKey = import.meta.env.VITE_CRYPTO_SECRET_KEY
 
 export const UserContextProvider = (props: ChatContextProviderProps) => {
     const navigate = useNavigate();
@@ -117,11 +121,16 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
             })
         }
     }, [])
-
-    useEffect(() => {
-        console.log(messages);
-    }, [messages])
     
+    const encryptMessage = (message: string) => {
+        return CryptoJS.AES.encrypt(message, secretKey).toString();
+    }
+
+    const decryptMessage = (encryptedMessage: string) => {
+        const bytes = CryptoJS.AES.decrypt(encryptedMessage, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    }
+
     const handleCreateUser = (e: FormEvent<HTMLFormElement>, user: User) => {
         e.preventDefault();
         if(userList ? userList.findIndex(currentUser => currentUser.username === user.username) === -1 : true){
@@ -194,7 +203,7 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
         e.preventDefault();
         set(ref(database, 'messages/'), [
             ...messages, 
-            {...message, timeCreated: message.timeCreated}
+            {...message, timeCreated: message.timeCreated, message: encryptMessage(message.message)}
         ]);
     }
     
@@ -217,7 +226,8 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
                     handleCloseRoom,
                     
                     messages,
-                    handleAddMessage
+                    handleAddMessage,
+                    decryptMessage
                 }
             }
         >
