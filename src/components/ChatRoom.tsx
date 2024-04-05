@@ -6,6 +6,7 @@ import { HiddenIcon } from "../assets/HiddenIcon";
 import { ShownIcon } from "../assets/ShownIcon";
 import { UsersIcon } from "../assets/UsersIcon";
 import { CloseIcon } from "../assets/CloseIcon";
+import { LogoutButton } from "./LogoutButton";
 
 interface RoomProps{
     room: Room
@@ -91,7 +92,7 @@ export const ChatRoom = (props: RoomProps) => {
                 <div>
                     <div className="bg-texture2 p-4 mb-1 relative lg:ms-1">
                         <h2 className="text-2xl text-texture1 md:text-3xl xl:text-xl">{props.room.roomName}</h2>
-                        <h3 className="text-base text-texture1 md:text-xl xl:text-sm">Created by <span>{props.room.createdBy.username}</span></h3>
+                        <h3 className="text-base text-texture1 md:text-xl xl:text-sm">Created by <span>{props.room.createdBy.username}</span> <LogoutButton /></h3>
                         <h3 className="text-base text-texture1 text-end lg:hidden">Online users: ({props.room.users.length - 1})</h3>
                         <button 
                             type="button" 

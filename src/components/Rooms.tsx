@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useChat } from "../contexts/ChatContext"
 import { AddIcon } from "../assets/AddIcon";
+import { LogoutButton } from "./LogoutButton";
 
 export const Rooms = () => {
     const {user, roomList, handleEnterRoom} = useChat();
@@ -8,7 +9,7 @@ export const Rooms = () => {
     return(
         <div className="h-screen">
             <div className="bg-texture2 p-4 mb-5">
-                <h2 className="text-2xl text-texture1">Welcome, <span style={{color: user?.color}}>{user?.username}</span>!</h2>
+                <h2 className="text-2xl text-texture1">Welcome, <span style={{color: user?.color}}>{user?.username}</span>! <LogoutButton /></h2>
                 <h3 className="text-base text-texture1">Rooms Available ({roomList ? roomList.length : 0})</h3>
             </div>
             <div className="
