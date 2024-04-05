@@ -1,3 +1,4 @@
+import CryptoJS from 'crypto-js';
 import { FormEvent, ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { database } from "../utils/firebase";
@@ -16,7 +17,7 @@ export interface Room{
 
 interface Message{
     createdBy: User,
-    timeCreated: Date,
+    timeCreated: string,
     message: string,
     isPrivate: boolean,
     messageTo: User | null,
@@ -39,7 +40,8 @@ interface ChatContextProps{
     handleCloseRoom: (room: Room) => void,
 
     messages: Message[],
-    handleAddMessage: (e: FormEvent<HTMLFormElement>, message: Message) => void
+    handleAddMessage: (e: FormEvent<HTMLFormElement>, message: Message) => void,
+    decryptMessage: (message: string) => string
 }
 
 interface ChatContextProviderProps{
@@ -47,6 +49,8 @@ interface ChatContextProviderProps{
 }
 
 export const ChatContext = createContext({} as ChatContextProps);
+
+const secretKey = import.meta.env.VITE_CRYPTO_SECRET_KEY
 
 export const UserContextProvider = (props: ChatContextProviderProps) => {
     const navigate = useNavigate();
@@ -105,22 +109,28 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
                     const data = snapshot.val();
                     setUserList(data.users ? data.users as User[] : []);
                     setRoomList(data.rooms ? data.rooms as Room[] : []);
-                    setMessages(data.messages ? data.messages.map((message: Message) => ({
-                                    ...message,
-                                    timeCreated: new Date(message.timeCreated),
+                    setMessages(data.messages ? data.messages.map((currentMessage: Message) => ({
+                                    ...currentMessage,
+                                    timeCreated: currentMessage.timeCreated,
                                 })) as Message[] : []);
                     setColors(data.colors ? data.colors.colorsHEX as string[] : ['#000000']);
+                    
                 }else{
                     alert("No data available");
                 }
             })
         }
     }, [])
-
-    // const addMessageToDatabase = (message: Message) => {
-    //     set(ref(database, 'messages/'), message);
-    // }
     
+    const encryptMessage = (message: string) => {
+        return CryptoJS.AES.encrypt(message, secretKey).toString();
+    }
+
+    const decryptMessage = (encryptedMessage: string) => {
+        const bytes = CryptoJS.AES.decrypt(encryptedMessage, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    }
+
     const handleCreateUser = (e: FormEvent<HTMLFormElement>, user: User) => {
         e.preventDefault();
         if(userList ? userList.findIndex(currentUser => currentUser.username === user.username) === -1 : true){
@@ -191,12 +201,10 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
 
     const handleAddMessage = (e: FormEvent<HTMLFormElement>, message: Message) => {
         e.preventDefault();
-        // Converts the Dates to strings for Realtime Database storage
-        const messagesWithStrings = messages.map(msg => ({
-            ...msg,
-            timeCreated: msg.timeCreated.toLocaleString('en-US')
-        }));
-        set(ref(database, 'messages/'), [...messagesWithStrings, {...message, timeCreated: message.timeCreated.toLocaleString('en-US')}]);
+        set(ref(database, 'messages/'), [
+            ...messages, 
+            {...message, timeCreated: message.timeCreated, message: encryptMessage(message.message)}
+        ]);
     }
     
     return(
@@ -218,7 +226,8 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
                     handleCloseRoom,
                     
                     messages,
-                    handleAddMessage
+                    handleAddMessage,
+                    decryptMessage
                 }
             }
         >
