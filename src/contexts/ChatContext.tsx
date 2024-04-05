@@ -49,6 +49,7 @@ export const ChatContext = createContext({} as ChatContextProps);
 
 export const UserContextProvider = (props: ChatContextProviderProps) => {
     const navigate = useNavigate();
+    const sessionTimeout = 900000;
     
     const [user, setUser] = useState<User | null>(null);
     const [userList, setUserList] = useState<User[]>([]);
@@ -56,9 +57,37 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [colors, setColors] = useState<string[]>([]);
 
+    const [lastActivity, setLastActivity] = useState(Date.now());
+
+    useEffect(() => {
+        const activityListener = () => {
+            setLastActivity(Date.now());
+        };
+
+        document.addEventListener('mousemove', activityListener);
+        document.addEventListener('keydown', activityListener);
+        document.addEventListener('touchstart', activityListener);
+
+        const interval = setInterval(() => {
+            if (Date.now() - lastActivity > sessionTimeout) {
+              // Session has ended
+              handleRemoveUser();
+              clearInterval(interval);
+              window.location.reload();
+            }
+        }, 1000);
+
+        return () => {
+            document.removeEventListener('mousemove', activityListener);
+            document.removeEventListener('keydown', activityListener);
+            document.removeEventListener('touchstart', activityListener);
+            clearInterval(interval);
+        };
+    }, [lastActivity]);
+
     useEffect(() => {
         // Stores the user in session
-        const loggedUser = sessionStorage.getItem("user");
+        const loggedUser = localStorage.getItem("user");
 
         // Checks if there is user stored in session
         if(loggedUser){
@@ -97,10 +126,18 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
             setUser(user);
             set(ref(database, 'users/'), [...userList, user]);
             const jsonCurrentUser = JSON.stringify(user);
-            sessionStorage.setItem("user", jsonCurrentUser);
+            localStorage.setItem("user", jsonCurrentUser);
         }else{
             alert("Username already exists!");
         }
+    }
+
+    const handleRemoveUser = () => {
+        const roomsWithUser = roomList.filter(currentRoom => currentRoom.users.some(currentUser => user && currentUser.username === user.username));
+        roomsWithUser.forEach(currentRoom => user && handleLeaveRoom(user, currentRoom));
+        localStorage.getItem("user") ? localStorage.removeItem("user") : "";
+
+        set(ref(database, 'users/'), userList.filter(currentUser => user && currentUser.username !== user.username));
     }
 
     const handleCreateRoom = (e: FormEvent<HTMLFormElement>, roomName: string, user: User) => {
@@ -132,13 +169,17 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
             // Update the room list with the updated room
             set(ref(database, 'rooms/'), [...notTheRoomItIsEntering, room]);
         }else{
-            // Remove the room from roomlist
+            // Deletes every message created in that room
+            set(ref(database, 'messages/'), messages.filter(currentMessage => currentMessage.room === room));
+            // Remove the room from roomlist if room is empty
             set(ref(database, 'rooms/'), notTheRoomItIsEntering);
         }
         navigate("/");
     }
 
     const handleCloseRoom = (room: Room) => {
+        // Deletes every message created in that room
+        set(ref(database, 'messages/'), messages.filter(currentMessage => currentMessage.room === room));
         set(ref(database, 'rooms/'), roomList.filter(currentRoom => currentRoom !== room));
         navigate("/");
     }
