@@ -10,11 +10,11 @@ export default {
     },
     extend: {
       colors: {
-        primary: "#caff42",
-        secondary: "#ebf7f8",
-        texture1: "#d0e0eb",
-        texture2: "#88abc2",
-        texture3: "#49708a"
+        primary: "#75e8e7",
+        secondary: "#F9F7F7",
+        texture1: "#DBE2EF",
+        texture2: "#3F72AF",
+        texture3: "#112D4E"
       }
     },
   },

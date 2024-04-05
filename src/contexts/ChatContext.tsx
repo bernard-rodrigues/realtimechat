@@ -57,25 +57,18 @@ export const UserContextProvider = (props: ChatContextProviderProps) => {
     const [colors, setColors] = useState<string[]>([]);
 
     useEffect(() => {
-        // fetch('/fakeAPI.json')
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         setUserList(data.users as User[]);
-        //         setMessages(data.messages.map((message: Message) => ({
-        //             ...message,
-        //             timeCreated: new Date(message.timeCreated),
-        //         })) as Message[]);
-        //         setRoomList(data.rooms as Room[]);
-        //         set(ref(database, '/'), data)
-        //     })
-
+        // Stores the user in session
         const loggedUser = sessionStorage.getItem("user");
 
+        // Checks if there is user stored in session
         if(loggedUser){
             setUser(JSON.parse(loggedUser) as User);
         }
 
+        // Get data from database
         const dataRef = ref(database);
+        
+        // Stores data in states
         if(dataRef){
             onValue(dataRef, (snapshot) => {
                 if(snapshot.exists()){
