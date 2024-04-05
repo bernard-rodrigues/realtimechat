@@ -18,7 +18,8 @@ const options: Intl.DateTimeFormatOptions =
         month: '2-digit', 
         day: '2-digit', 
         hour: '2-digit', 
-        minute: '2-digit'
+        minute: '2-digit',
+        second: '2-digit'
     }
 
 export const ChatRoom = (props: RoomProps) => {   
@@ -35,7 +36,7 @@ export const ChatRoom = (props: RoomProps) => {
             messageTo: messageTo,
             isPrivate: isPrivate,
             room: props.room,
-            timeCreated: new Date()
+            timeCreated: new Date().toISOString()
         })
         setMessageText('');
     }
@@ -121,7 +122,7 @@ export const ChatRoom = (props: RoomProps) => {
                                     }
                                     key={index}
                                 >
-                                    <b><span style={{color: currentMessage.createdBy.color}}>{currentMessage.createdBy.username}</span> said {currentMessage.isPrivate ? <u>privately</u> : <></>} to <span style={{color: currentMessage.messageTo?.color}}>{currentMessage.messageTo ? currentMessage.messageTo.username : "everyone"}</span>:</b> {currentMessage.message} <span className="text-xs text-slate-400">(at {currentMessage.timeCreated.toLocaleDateString('en-US', options)})</span>
+                                    <b><span style={{color: currentMessage.createdBy.color}}>{currentMessage.createdBy.username}</span> said {currentMessage.isPrivate ? <u>privately</u> : <></>} to <span style={{color: currentMessage.messageTo?.color}}>{currentMessage.messageTo ? currentMessage.messageTo.username : "everyone"}</span>:</b> {currentMessage.message} <span className="text-xs text-slate-400">(at {new Date(currentMessage.timeCreated).toLocaleDateString('en-US', options)})</span>
                                 </p>
                                 :
                                 <div key={index}></div>
